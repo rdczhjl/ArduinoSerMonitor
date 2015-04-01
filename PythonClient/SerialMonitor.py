@@ -14,6 +14,9 @@ import serial
 welcomeStr= "Hello, Welcome to the Arduino Serial Monitor"
 print (welcomeStr)
 
+yourCmd=input("Please input your command")
+print ("Your Command is"+yourCmd)
+
 
 
 class SerialMonitor(object):
