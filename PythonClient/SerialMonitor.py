@@ -8,6 +8,7 @@ import sys
 import serial
 import ConfigParser
 
+
 global running
 global monitor
 global configureFile
@@ -28,12 +29,14 @@ class SerialMonitor(object):
         SerialMonitor.baudRate=4800
         SerialMonitor.onInterval=10
         SerialMonitor.offInteval=1
-        
+        serSession=0
         
     def setOnInterval(self,interval):
         print ("here is setOnInterval in SerialMonitor")
         print ("Now setting on interval to "+interval[0])
         SerialMonitor.onInterval=interval[0]
+        #serSession.write("setOn")
+        #serSession.write(SerialMonitor.onInterval)
         
     def setOffInterval(self,interval):
         print ("here is setOffInterval in SerialMonitor")
@@ -46,15 +49,18 @@ class SerialMonitor(object):
     def getOnInterval(self,notUsed):
         return SerialMonitor.onInterval
     
-    def getConfig(self,filename):
+    def getConfigAndSetup(self,filename):
         configureFile=ConfigParser.ConfigParser()
         configureFile.read(filename)
         SerialMonitor.comPort=configureFile.get("global","ComPort")
         SerialMonitor.baudRate=configureFile.get("global","BaudRate")
-
+        
+        print("Now setup ..COM:"+SerialMonitor.comPort+"Baud:"+SerialMonitor.baudRate)
+        serSession=serial.Serial(SerialMonitor.comPort,SerialMonitor.baudRate)
+        
 # ==============define the global func ==================
 def byebye(notUsed):
-        print ("byebye , leaving ...")
+        print ("byebye , leaving ...COM Port "+SerialMonitor.comPort+" BaudRate"+SerialMonitor.baudRate)
         running=False
         exit(0)
 
@@ -82,8 +88,7 @@ if args.count('-c'):
 else:
     nameOfConfigFile="SerMonitorConfig.cfg"        
 print ("Reading config file "+nameOfConfigFile)
-monitor.getConfig(nameOfConfigFile)
-
+monitor.getConfigAndSetup(nameOfConfigFile)
 
 
 running=True
