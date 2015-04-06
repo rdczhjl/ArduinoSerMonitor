@@ -44,10 +44,17 @@ class SerialMonitor(object):
         print("Now setup ..COM:"+SerialMonitor.comPort+"Baud:"+SerialMonitor.baudRate)
         self.serSession=serial.Serial(SerialMonitor.comPort,SerialMonitor.baudRate)
         print ("Open the serial session "+str(self.serSession.isOpen()))
+        self.serSession.timeout=0
 
     def closeAll(self):
         if isinstance(self.serSession, serial.Serial) :
-             self.serSession.close()
+            self.serSession.close()
+             
+    def printMessageFromPeer(self):
+        theMsgList=self.serSession.readlines()
+        for m in theMsgList :
+            print(m) 
+    
     
     def setOnInterval(self,interval):
         global theMessageFormat
@@ -117,11 +124,14 @@ while running:
         #get the intension 
         theIntension=raw_input("Please input your command:")
         print ("Your Command is "+theIntension)
+        
         #translate the intension to the command
-        theCmd=theIntension.split()
-        func=theCmdDict[theCmd[0]]
-        retVal=func(theCmd[1:]);
-        #print (retVal)
-
+        try:
+            theCmd=theIntension.split()
+            func=theCmdDict[theCmd[0]]
+            retVal=func(theCmd[1:]);
+            monitor.printMessageFromPeer()
+        except :
+            print ("Wrong Format of Command ...")
           
 exit (0)    
