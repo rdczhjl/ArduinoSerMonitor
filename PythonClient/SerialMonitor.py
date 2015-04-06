@@ -5,14 +5,16 @@ Created on Apr 1, 2015
 It is the Client towards Arduino
 '''
 import sys
+import struct
 import serial
 import ConfigParser
+
 
 
 global running
 global monitor
 global configureFile
-
+global theMessageFormat
 
 # ==============class definition ======================== 
 class SerialMonitor(object):
@@ -21,34 +23,18 @@ class SerialMonitor(object):
     '''
     
 
-
 #Constructor
+
     def __init__(self, param):
         #setup the serial connection
         SerialMonitor.comPort=0
         SerialMonitor.baudRate=4800
         SerialMonitor.onInterval=10
         SerialMonitor.offInteval=1
-        serSession=0
+        self.serSession=0
         
-    def setOnInterval(self,interval):
-        print ("here is setOnInterval in SerialMonitor")
-        print ("Now setting on interval to "+interval[0])
-        SerialMonitor.onInterval=interval[0]
-        #serSession.write("setOn")
-        #serSession.write(SerialMonitor.onInterval)
+       
         
-    def setOffInterval(self,interval):
-        print ("here is setOffInterval in SerialMonitor")
-        print ("Now setting off interval to "+interval[0])
-        SerialMonitor.offInterval=interval[0]
-        
-    def getOffInterval(self,notUsed):
-        return SerialMonitor.offInterval
-    
-    def getOnInterval(self,notUsed):
-        return SerialMonitor.onInterval
-    
     def getConfigAndSetup(self,filename):
         configureFile=ConfigParser.ConfigParser()
         configureFile.read(filename)
@@ -56,13 +42,46 @@ class SerialMonitor(object):
         SerialMonitor.baudRate=configureFile.get("global","BaudRate")
         
         print("Now setup ..COM:"+SerialMonitor.comPort+"Baud:"+SerialMonitor.baudRate)
-        serSession=serial.Serial(SerialMonitor.comPort,SerialMonitor.baudRate)
+        self.serSession=serial.Serial(SerialMonitor.comPort,SerialMonitor.baudRate)
+        print ("Open the serial session "+str(self.serSession.isOpen()))
+
+    def closeAll(self):
+        if isinstance(self.serSession, serial.Serial) :
+             self.serSession.close()
+    
+    def setOnInterval(self,interval):
+        global theMessageFormat
+        
+        print ("here is setOnInterval in SerialMonitor")
+        print ("Now setting on interval to "+interval[0])
+        SerialMonitor.onInterval=interval[0]
+        theMsg=struct.pack(theMessageFormat,"seOn",SerialMonitor.onInterval)
+        numOut=self.serSession.write(theMsg)
+        print ("We sent the command setOn "+interval[0]+" to Arduino and "+str(numOut)+" are sent")
+        
+        
+    def setOffInterval(self,interval):
+        print ("here is setOffInterval in SerialMonitor")
+        print ("Now setting off interval to "+interval[0])
+        SerialMonitor.onInterval=interval[0]
+        theMsg=struct.pack(theMessageFormat,"seOf",SerialMonitor.onInterval)
+        numOut=self.serSession.write(theMsg)
+        print ("We sent the command setOff "+interval[0]+" to Arduino and "+str(numOut)+" are sent")
+        
+    def getOffInterval(self,notUsed):
+        return SerialMonitor.offInterval
+    
+    def getOnInterval(self,notUsed):
+        return SerialMonitor.onInterval
+    
         
 # ==============define the global func ==================
 def byebye(notUsed):
-        print ("byebye , leaving ...COM Port "+SerialMonitor.comPort+" BaudRate"+SerialMonitor.baudRate)
+        global running,monitor
+        print ("byebye , leaving ...COM Port "+SerialMonitor.comPort+" BaudRate "+SerialMonitor.baudRate)
+        monitor.closeAll()
         running=False
-        exit(0)
+
 
 
 def extfunc1(notUsed):
@@ -71,9 +90,9 @@ def extfunc1(notUsed):
 # ==============define the global dictionary ==================
 
 monitor=SerialMonitor("dummy")
-theCmdDict={'bye':byebye,'extfunc1':extfunc1,'setOn':monitor.setOnInterval,'setOff':monitor.setOffInterval,
-            'getOn':monitor.getOnInterval,'getOff':monitor.getOffInterval}
-
+theCmdDict={'bye':byebye,'extfunc1':extfunc1,'seOn':monitor.setOnInterval,'seOf':monitor.setOffInterval,
+            'geOn':monitor.getOnInterval,'geOf':monitor.getOffInterval}
+theMessageFormat="4sc"
 
 # ==============main ======================== 
 
@@ -102,7 +121,7 @@ while running:
         theCmd=theIntension.split()
         func=theCmdDict[theCmd[0]]
         retVal=func(theCmd[1:]);
-        print (retVal)
+        #print (retVal)
 
           
 exit (0)    
