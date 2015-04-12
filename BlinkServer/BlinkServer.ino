@@ -47,7 +47,7 @@ void loop() {
   
       Serial.print("got cmd ");
       Serial.println((char*)cmd);
-      Serial.print(" and value ");
+      Serial.print(" and parameter ");
       Serial.println(value[0]-'0',DEC);
   
       if (strcmp("seOn",(char*)cmd)==0){
@@ -59,6 +59,16 @@ void loop() {
           offInterval=value[0]-'0';
           Serial.println("Off Interval is set");  
        }
+
+      if (strcmp("geOn",(char*)cmd)==0){
+          Serial.print("Get Value of On Interval:");
+          Serial.println(onInterval,DEC);
+      }
+
+      if (strcmp("geOf",(char*)cmd)==0){
+          Serial.print("Get Value of On Interval:");
+          Serial.println(offInterval,DEC);
+      }
   
   }//num1 or num2 not meet criteria
   

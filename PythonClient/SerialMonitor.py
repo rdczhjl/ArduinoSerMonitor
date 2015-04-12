@@ -76,9 +76,17 @@ class SerialMonitor(object):
         print ("We sent the command setOff "+interval[0]+" to Arduino and "+str(numOut)+" are sent")
         
     def getOffInterval(self,notUsed):
+        print ("here is getOffInterval in SerialMonitor")
+        theMsg=struct.pack(theMessageFormat,"geOf",'0')
+        numOut=self.serSession.write(theMsg)
+        print ("We sent the command setOff to Arduino and "+str(numOut)+" are sent")
         return SerialMonitor.offInterval
     
     def getOnInterval(self,notUsed):
+        print ("here is getOnInterval in SerialMonitor")
+        theMsg=struct.pack(theMessageFormat,"geOn",'0')
+        numOut=self.serSession.write(theMsg)
+        print ("We sent the command setOff to Arduino and "+str(numOut)+" are sent")
         return SerialMonitor.onInterval
     
         
