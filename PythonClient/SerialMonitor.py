@@ -4,10 +4,10 @@ Created on Apr 1, 2015
 @author: rdczhjl
 It is the Client towards Arduino
 '''
-import sys
-import struct
-import serial
 import ConfigParser
+import serial
+import struct
+import sys
 
 
 
@@ -112,9 +112,14 @@ args=sys.argv
 if args.count('-c'):
     nameOfConfigFile=args[args.index('-c')+1]
 else:
-    nameOfConfigFile="SerMonitorConfig.cfg"        
+    nameOfConfigFile="../SerMonitorConfig.cfg"        
 print ("Reading config file "+nameOfConfigFile)
-monitor.getConfigAndSetup(nameOfConfigFile)
+
+try:
+    monitor.getConfigAndSetup(nameOfConfigFile)
+except:
+    print ("Please check whether the configure file is there or Arduino HW is connected")
+    exit(-1)
 
 
 running=True
